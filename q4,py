@@ -1,0 +1,19 @@
+from pyspark import SparkContext
+import sys
+
+if __name__ == "__main__":
+    sc = SparkContext("local", "Longest Word")
+    sc.setLogLevel("ERROR")
+
+    if len(sys.argv) < 2:
+        print("Usage: longest_word.py <file>")
+        sys.exit(1)
+
+    lines = sc.textFile(sys.argv[1])
+    # Split lines into words and find the one with max length
+    longest_word = lines.flatMap(lambda line: line.split(" ")) \
+                        .reduce(lambda a, b: a if len(a) > len(b) else b)
+
+    print("--------------------------------------------")
+    print("Longest word is: " + str(longest_word))
+    print("--------------------------------------------")
