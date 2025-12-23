@@ -1,25 +1,27 @@
-from pyspark import SparkContext
 import sys
+from pyspark import SparkConf, SparkContext
 
-if __name__ == "__main__":
-    sc = SparkContext("local", "Word Count")
-    sc.setLogLevel("ERROR")
-    
+def main():
+    conf = SparkConf().setAppName("WordCountRepartition").setMaster("local[*]")
+    sc = SparkContext(conf=conf)
+
     if len(sys.argv) < 2:
-        print("Usage: word_count.py <file>")
+        print("Usage: program.py <input_file>")
         sys.exit(1)
 
-    lines = sc.textFile(sys.argv[1])
-    
-    counts = lines.flatMap(lambda line: line.split(" ")) \
-                  .repartition(5) \
-                  .map(lambda word: (word, 1)) \
-                  .reduceByKey(lambda a, b: a + b) \
-                  .filter(lambda x: len(x[0]) > 5)
-                  
-    output = counts.take(10)
-    
-    print("-------------------------------------------")
+    text_file = sc.textFile(sys.argv[1])
+
+    counts = text_file.flatMap(lambda line: line.split(" ")) \
+                      .repartition(5) \
+                      .map(lambda word: (word, 1)) \
+                      .reduceByKey(lambda a, b: a + b) \
+                      .filter(lambda x: len(x[0]) > 5)
+
+    output = counts.collect()
     for (word, count) in output:
-        print("%s: %i" % (word, count))
-    print("-------------------------------------------")
+        print(f"{word}: {count}")
+
+    sc.stop()
+
+if __name__ == "__main__":
+    main()
