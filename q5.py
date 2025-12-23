@@ -16,7 +16,7 @@ def main():
     if not counts.isEmpty():
         max_words = counts.max()
         print("--------------------------------------------")
-        print("Max number of words in a single line: " + str(max_words))
+        print("Max number of words: " + str(max_words))
         print("--------------------------------------------")
     else:
         print("Input file is empty")
