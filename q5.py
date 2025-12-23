@@ -1,21 +1,27 @@
-from pyspark import SparkContext
 import sys
+from pyspark import SparkConf, SparkContext
 
-if __name__ == "__main__":
-    sc = SparkContext("local", "LineWordCount")
-    sc.setLogLevel("ERROR")
-    
+def main():
+    conf = SparkConf().setAppName("MaxWordsInLine").setMaster("local[*]")
+    sc = SparkContext(conf=conf)
+
     if len(sys.argv) < 2:
-        print("Usage: count_words_in_line.py <file>")
+        print("Usage: program.py <input_file>")
         sys.exit(1)
 
     lines = sc.textFile(sys.argv[1])
-    
-    # Map each line to its word count
+
     counts = lines.map(lambda line: len(line.split()))
-    
+
     if not counts.isEmpty():
         max_words = counts.max()
         print("--------------------------------------------")
-        print("Max number of words: " + str(max_words))
+        print("Max number of words in a single line: " + str(max_words))
         print("--------------------------------------------")
+    else:
+        print("Input file is empty")
+
+    sc.stop()
+
+if __name__ == "__main__":
+    main()
